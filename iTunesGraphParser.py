@@ -38,6 +38,7 @@ for use in the InfoVis JavaScript library.
 
 from __future__ import division
 from optparse import OptionParser
+from operator import itemgetter
 
 import os
 import plistlib
@@ -67,21 +68,16 @@ class ITunesGraphParser:
 
         self._processArtists()
         self._processGenres()
+        self._processNodes()
 
         jsonObj = {
-                'nodes': [],
+                'nodes': self._nodes,
+                'links': self._links,
                 'maxArtistSongs': self._maxArtistSongs,
                 'maxArtistPlays': self._maxArtistPlays,
                 'maxGenreSongs': self._maxGenreSongs,
                 'maxGenrePlays': self._maxGenrePlays
                 }
-
-        # Append genres/artists to jsonObj nodes
-        for k in self._genres:
-            jsonObj['nodes'].append(self._genres[k])
-
-        #for k in self._artists:
-            #jsonObj['nodes'].append(self._artists[k])
 
         return json.dumps(jsonObj, indent=indent, cls=SetEncoder)
 
@@ -105,28 +101,27 @@ class ITunesGraphParser:
         
             # Filter out any non-music with ratings lower than 3 stars
             if (track['Track Type'] != 'File') or ('Artist' not in track) or ('Genre' not in track) or (
-                    'Rating' not in track) or (track['Rating'] < 60):
+                    'Rating' not in track) or (track['Rating'] < 80):
                 continue
 
             akey = track['Artist']
             if akey not in self._artists:
                 self._artists[akey] = { 
-                        'id': 'a' + str(len(self._artists)), 
+                        'id': len(self._artists), 
                         'name': akey,
-                        'adjacencies': set(), 
-                        'data': { 'type': 'a', 'count': 0, 'plays': 0, 'rating': 0 },
+                        'type': 'a', 'count': 0, 'plays': 0, 'rating': 0,
                         'genres': set()
                         }
 
             rating = (track['Rating'] // 20)
             plays = track['Play Count'] if 'Play Count' in track else 0
 
-            self._artists[akey]['data']['count'] += 1
-            self._artists[akey]['data']['rating'] += rating
-            self._artists[akey]['data']['plays'] += plays
+            self._artists[akey]['count'] += 1
+            self._artists[akey]['rating'] += rating
+            self._artists[akey]['plays'] += plays
 
-            self._maxArtistSongs = max(self._maxArtistSongs, self._artists[akey]['data']['count'])
-            self._maxArtistPlays = max(self._maxArtistPlays, self._artists[akey]['data']['plays'])
+            self._maxArtistSongs = max(self._maxArtistSongs, self._artists[akey]['count'])
+            self._maxArtistPlays = max(self._maxArtistPlays, self._artists[akey]['plays'])
 
             # Split up the Genres
             genreParts = track['Genre'].split('/')
@@ -139,42 +134,57 @@ class ITunesGraphParser:
         for akey in self._artists.keys():
     
             # Filter out any one-hit wonders
-            if self._artists[akey]['data']['count'] <= 2:
+            if self._artists[akey]['count'] <= 2:
                 del self._artists[akey]
                 continue
 
             genreParts = self._artists[akey]['genres']
-            for gkey in genreParts:
+            for gkey in list(genreParts):
+                if gkey == 'Mix':
+                    genreParts.remove(gkey)
+                    continue
 
                 if gkey not in self._genres:
                     self._genres[gkey] = { 
-                            'id': 'g' + str(len(self._genres)),
+                            'id': len(self._genres),
                             'name': gkey,
-                            'adjacencies': set(),
-                            'data': { 'type': 'g', 'count': 0, 'plays': 0, 'rating': 0 }
+                            'type': 'g', 'count': 0, 'plays': 0, 'rating': 0,
+                            'adjGenres': set()
                             }
 
-                self._genres[gkey]['data']['count'] += 1
-                self._genres[gkey]['data']['rating'] += self._artists[akey]['data']['rating']
-                self._genres[gkey]['data']['plays'] += self._artists[akey]['data']['plays']
+                self._genres[gkey]['count'] += 1
+                self._genres[gkey]['rating'] += self._artists[akey]['rating']
+                self._genres[gkey]['plays'] += self._artists[akey]['plays']
 
-                self._maxGenreSongs = max(self._maxGenreSongs, self._genres[gkey]['data']['count'])
-                self._maxGenrePlays = max(self._maxGenrePlays, self._genres[gkey]['data']['plays'])
-
-                # Add adjacencies between genres and songs
-                #self._genres[gkey]['adjacencies'].add(self._artists[akey]['id'])
-                #self._artists[akey]['adjacencies'].add(self._genres[gkey]['id'])
+                self._maxGenreSongs = max(self._maxGenreSongs, self._genres[gkey]['count'])
+                self._maxGenrePlays = max(self._maxGenrePlays, self._genres[gkey]['plays'])
 
             # Add adjacencies between genre parts 
             for gkey in genreParts:
                 for gkey2 in genreParts:
-                    gid = self._genres[gkey2]['id']
-                    if gid != self._genres[gkey]['id']:
-                        self._genres[gkey]['adjacencies'].add(gid)
+                    if gkey != gkey2:
+                        self._genres[gkey]['adjGenres'].add(gkey2)
 
             # remove genres from artist obj
-            del self._artists[akey]['genres']
+            #del self._artists[akey]['genres']
 
+
+    def _processNodes(self):
+        self._links = []
+        self._nodes = sorted(self._genres.itervalues(), key=itemgetter('id'))
+        
+        for idx, genre in enumerate(self._nodes):
+            #for gid in genre['adjGenres']:
+                #self._links.append({ 'source': gid, 'target': idx })
+
+            del genre['adjGenres']
+
+        idx = len(self._nodes);
+        for akey in self._artists.keys():
+            self._nodes.append(self._artists[akey])
+            for g in self._artists[akey]['genres']:
+                self._links.append({ 'source': idx, 'target': self._genres[g]['id'] }) # TODO add number of songs
+            idx += 1
 
 
 #### main block ####

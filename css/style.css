@@ -1,7 +1,15 @@
-#infovis {
-    position: relative;
-    width: 600px;
-    height: 600px;
-    margin: auto;
-    overflow: hidden;
+
+circle.node {
+    cursor: pointer;
+    stroke: #3182bd;
+    stroke-width: 1.5px;
+}
+line.link {
+    fill: none;
+    stroke: #C1D6E1;
+    stroke-width: 1px;
+}
+#chart text.label {
+    font: 10px sans-serif;
+    color: #000000;
 }
