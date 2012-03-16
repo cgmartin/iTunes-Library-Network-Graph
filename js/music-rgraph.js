@@ -1,7 +1,7 @@
 $(function() {
 
-    var w = 960,
-        h = 600,
+    var w = 900,
+        h = 500,
         node,
         link,
         labels,
@@ -53,6 +53,7 @@ $(function() {
     function fade(bo) {
         return function(d) {
             var opacity = bo ? 0.2 : 1;
+            var rad = radius(d);
 
             node.style('stroke-opacity', function(o) {
                 thisOpac = isConnected(d, o) ? 1 : opacity;
@@ -64,39 +65,50 @@ $(function() {
                 return o.source === d || o.target === d ? 1 : opacity;
             });
 
-            if (bo) {
-                labels.append('svg:text')
-                    .attr('y', '13px')
-                    .attr('text-anchor', 'middle')
-                    .text('')
-                    .attr('class', 'label')
-                    .style('fill-opacity', function(o) {
-                        thisOpac = isConnected(d, o) ? 1 : opacity;
-                        return thisOpac;
-                    })
-                    .text(function(o) { return isConnected(d, o) ? o.name : ''; });
-            } else {
-                labels.select('text.label').remove();
-            }
 
-            /*
+            labels.select('text.label').remove();
+            node.select('title').remove();
             if (bo) {
-                labels.append('svg:text')
-                    .attr('y', 5)
+                labels.filter(function(o) {
+                        return isConnected(o, d);
+                    })
+                    .append('svg:text')
+                    .attr('y', function(o) {
+                            return (o == d) ? (rad + 10) + 'px' : '5px';
+                        })
+                    .style('fill', '#C17021')
                     .attr('text-anchor', 'middle')
-                    .text(function(o) { return isConnected(d, o) && isNaN(o.name) ? o.name : ''; })
-                    .attr('class', 'nodeName');
+                    .attr('class', 'label')
+                    .text(function(o) { return (o !== d) ? o.name.substr(0, 16) : ''; });
+
+                node.filter(function(o) {
+                        return o === d;
+                    })
+                    .append('title')
+                    .text(function(o) { return o.name + ' / Count: ' + o.count; });
             } else {
-                vis.selectAll('text.nodeName').remove('');
+                /*
+                labels.filter(function(o) {
+                        return o.type == 'g';
+                    })
+                    .append('svg:text')
+                    .attr('y', '5px')
+                    .style('fill', '#C17021')
+                    .attr('text-anchor', 'middle')
+                    .attr('class', 'label')
+                    .text(function(o) { return o.name.substr(0, 16); })
+                    .on('mouseover', function(o) {
+                            d3.select(this).text('');
+                        });
+                */
             }
-            */
         };
     }
 
     var force = d3.layout.force()
         .on('tick', tick)
         .size([w, h])
-        .linkDistance(30)
+        .linkDistance(20)
         //.gravity(0.05)
         .charge(function(d, i) { 
                 var r = typeSize(d);
@@ -115,9 +127,9 @@ $(function() {
             .links(root.links)
             .start();
 
-        setTimeout(function() {
-            force.stop();
-        }, 10000);
+        //setTimeout(function() {
+        //    force.stop();
+        //}, 10000);
 
         // Update the links
         link = vis.selectAll('link.link')
@@ -164,15 +176,16 @@ $(function() {
 
         labels.enter().append('svg:g')
             .attr('class', 'labelParent');
-            
+
         labels.exit().remove();
+
+        // Init fade state
+        node.each(fade(false));
     }
 
     d3.json('js/music-data.json', function(json) {
         root = json;
-        console.log(json);
         update();
     });
-
 
 });

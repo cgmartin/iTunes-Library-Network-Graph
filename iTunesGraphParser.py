@@ -101,7 +101,7 @@ class ITunesGraphParser:
         
             # Filter out any non-music with ratings lower than 3 stars
             if (track['Track Type'] != 'File') or ('Artist' not in track) or ('Genre' not in track) or (
-                    'Rating' not in track) or (track['Rating'] < 80):
+                    'Rating' not in track) or (track['Rating'] < 80) or (track['Artist'] == 'Various Artists'):
                 continue
 
             akey = track['Artist']
@@ -152,7 +152,7 @@ class ITunesGraphParser:
                             'adjGenres': set()
                             }
 
-                self._genres[gkey]['count'] += 1
+                self._genres[gkey]['count'] += self._artists[akey]['count']
                 self._genres[gkey]['rating'] += self._artists[akey]['rating']
                 self._genres[gkey]['plays'] += self._artists[akey]['plays']
 

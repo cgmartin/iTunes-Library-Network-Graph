@@ -1,4 +1,16 @@
-
+body {
+    background-color: #fff;
+    color: #000;
+    font-family: sans-serif;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+}
+#chart {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
 circle.node {
     cursor: pointer;
     stroke: #3182bd;
@@ -11,5 +23,5 @@ line.link {
 }
 #chart text.label {
     font: 10px sans-serif;
-    color: #000000;
+    color: #ffffff;
 }
