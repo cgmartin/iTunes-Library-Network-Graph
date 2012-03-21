@@ -22,16 +22,28 @@
     <script src="js/music-rgraph.js"></script>
 </head>
 <body>
-<header>
-    <h1>iTunes Music Libary Network Graph</h1>
-    <h2>My favorite artists : <em>number of songs, by genre</em></h2>
-</header>
-<div role="main">
-    <div id="chart"></div>
-</div>
-<footer>
+    <div id="page">
+        <header>
+            <h1>iTunes Music Libary Network Graph</h1>
+            <h2>Favorite artists &amp; genres (4/5 stars)</h2>
+        </header>
+        <div role="main">
+            <div class="buttons">
+                <button class="first active" id="songsBtn"># of Songs</button><button 
+                    class="last" id="playsBtn"># of Plays</button>
+            </div>
 
-</footer>
-
+            <div id="chart"></div>
+        </div>
+        <footer role="contentinfo">
+	        <nav role="navigation">
+		        <ul>
+                    <li>By <a href="http://cgmartin.com">CGMartin</a></li>
+			        <li>Using <a href="http://mbostock.github.com/d3/">D3.js</a></li>
+                </ul>
+                <p>Licenced under a <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 License</a>.</p>
+	        </nav>		
+        </footer>	
+    </div>
 </body>
 </html>

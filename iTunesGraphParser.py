@@ -11,7 +11,7 @@ for use in the InfoVis JavaScript library.
         'Album': 'Nirvana',
         'Persistent ID': 'A50FE1436726815C',
         'Track Number': 4,
-        'Location': 'file://localhost/Users/cmartin/Music/iTunes/iTunes%20Music/Nirvana/Nirvana/04%20Sliver.mp3',
+        'Location': 'file://localhost/Users/foo/Music/iTunes/iTunes%20Music/Nirvana/Nirvana/04%20Sliver.mp3',
         'File Folder Count': 4,
         'Album Rating Computed': True,
         'Total Time': 134295,
@@ -60,7 +60,8 @@ class ITunesGraphParser:
         self.libraryFile = libraryFile
 
 
-    def toJson(self, indent=None):
+    def toJson(self, rating=4, indent=None):
+        self._rating = rating * 20
         self._maxArtistSongs = 0
         self._maxArtistPlays = 0
         self._maxGenreSongs = 0
@@ -81,7 +82,8 @@ class ITunesGraphParser:
 
         return json.dumps(jsonObj, indent=indent, cls=SetEncoder)
 
-    def toJsonP(self, indent=None):
+    def toJsonP(self, rating=4, indent=None):
+        self._rating = rating * 20
         json = self.toJson(indent)
         jsonp = 'itgCallback(' + json + ');'
         return jsonp
@@ -101,7 +103,7 @@ class ITunesGraphParser:
         
             # Filter out any non-music with ratings lower than 3 stars
             if (track['Track Type'] != 'File') or ('Artist' not in track) or ('Genre' not in track) or (
-                    'Rating' not in track) or (track['Rating'] < 80) or (track['Artist'] == 'Various Artists'):
+                    'Rating' not in track) or (track['Rating'] < self._rating) or (track['Artist'] == 'Various Artists'):
                 continue
 
             akey = track['Artist']
@@ -165,8 +167,6 @@ class ITunesGraphParser:
                     if gkey != gkey2:
                         self._genres[gkey]['adjGenres'].add(gkey2)
 
-            # remove genres from artist obj
-            #del self._artists[akey]['genres']
 
 
     def _processNodes(self):
@@ -183,7 +183,7 @@ class ITunesGraphParser:
         for akey in self._artists.keys():
             self._nodes.append(self._artists[akey])
             for g in self._artists[akey]['genres']:
-                self._links.append({ 'source': idx, 'target': self._genres[g]['id'] }) # TODO add number of songs
+                self._links.append({ 'source': idx, 'target': self._genres[g]['id'] }) 
             idx += 1
 
 
@@ -195,6 +195,9 @@ parser = OptionParser(version="%prog 1.0")
 parser.add_option('-f', '--file', dest='file', type='string',
         help='iTunes Library XML file path',
         default=defaultLibraryFile)
+parser.add_option('-r', '--rating', dest='rating', type='int',
+        help='Minimum rating filter (default = 4)',
+        default=4)
 parser.add_option('-j', '--json', dest='json', action='store_true',
         help='Output in JSON format (default)')
 parser.add_option('-p', '--jsonp', dest='jsonp', action='store_true',
@@ -209,7 +212,7 @@ if __name__ == '__main__':
 
     itunesParser = ITunesGraphParser(options.file)
     if options.jsonp:
-        print itunesParser.toJsonP(options.indent)
+        print itunesParser.toJsonP(options.rating, options.indent)
     else:
-        print itunesParser.toJson(options.indent)
+        print itunesParser.toJson(options.rating, options.indent)
 

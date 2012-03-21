@@ -6,7 +6,8 @@ $(function() {
         link,
         labels,
         root,
-        linkIndexes;
+        linkIndexes,
+        typeSize;
 
     function tick(e) {
         link.attr("x1", function(d) { return d.source.x; })
@@ -26,7 +27,7 @@ $(function() {
         return (d.type === 'g') ? '#3182bd' : '#c6dbef';
     }
 
-    function typeSize(d) {
+    function songsTypeSize(d) {
         var s;
         if (d.type === 'g') {
             s = d.count / root.maxGenreSongs;
@@ -36,6 +37,17 @@ $(function() {
         return s;
     }
 
+    function playsTypeSize(d) {
+        var s;
+        if (d.type === 'g') {
+            s = d.plays / root.maxGenrePlays;
+        } else {
+            s = d.plays / root.maxArtistPlays;
+        }
+        return s;
+    }
+    typeSize = songsTypeSize;
+
     function radius(d) {
         var r = typeSize(d);
         if (d.type === 'g') {
@@ -44,6 +56,11 @@ $(function() {
             r = Math.max(r * 25, 2);
         }
         return r;
+    }
+
+    function charge(d, i) { 
+        var r = typeSize(d);
+        return -r * 1000;
     }
 
     function isConnected(a, b) {
@@ -68,6 +85,7 @@ $(function() {
 
             labels.select('text.label').remove();
             node.select('title').remove();
+
             if (bo) {
                 labels.filter(function(o) {
                         return isConnected(o, d);
@@ -85,22 +103,7 @@ $(function() {
                         return o === d;
                     })
                     .append('title')
-                    .text(function(o) { return o.name + ' / Count: ' + o.count; });
-            } else {
-                /*
-                labels.filter(function(o) {
-                        return o.type == 'g';
-                    })
-                    .append('svg:text')
-                    .attr('y', '5px')
-                    .style('fill', '#C17021')
-                    .attr('text-anchor', 'middle')
-                    .attr('class', 'label')
-                    .text(function(o) { return o.name.substr(0, 16); })
-                    .on('mouseover', function(o) {
-                            d3.select(this).text('');
-                        });
-                */
+                    .text(function(o) { return o.name + ' / Songs: ' + o.count + ' / Plays: ' + o.plays; });
             }
         };
     }
@@ -108,13 +111,9 @@ $(function() {
     var force = d3.layout.force()
         .on('tick', tick)
         .size([w, h])
-        .linkDistance(20)
+        .linkDistance(30)
         //.gravity(0.05)
-        .charge(function(d, i) { 
-                var r = typeSize(d);
-                return -r * 1000;
-                //return -(1 / r) * 30; 
-            });
+        .charge(charge);
 
     var vis = d3.select('#chart').append('svg:svg')
         .attr('width', w)
@@ -126,10 +125,6 @@ $(function() {
             .nodes(root.nodes)
             .links(root.links)
             .start();
-
-        //setTimeout(function() {
-        //    force.stop();
-        //}, 10000);
 
         // Update the links
         link = vis.selectAll('link.link')
@@ -181,8 +176,40 @@ $(function() {
 
         // Init fade state
         node.each(fade(false));
+
+        // Button toggles
+        $('#songsBtn').click(function() {
+            force.stop();
+
+            typeSize = songsTypeSize;
+
+            vis.selectAll('circle.node')
+                .attr('r', radius);
+
+            force.charge(charge).start();
+
+            $(this).addClass('active');
+            $('#playsBtn').removeClass('active');
+            return false;
+        });
+        $('#playsBtn').click(function() {
+            force.stop();
+
+            typeSize = playsTypeSize;
+            
+            vis.selectAll('circle.node')
+                .attr('r', radius);
+
+            force.charge(charge).start();
+
+            $(this).addClass('active');
+            $('#songsBtn').removeClass('active');
+            return false;
+        });
+
     }
 
+    // Load the json data
     d3.json('js/music-data.json', function(json) {
         root = json;
         update();
