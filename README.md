@@ -1,8 +1,7 @@
 # iTunes Music Library Network Graph
 
-## Using [D3.js](http://mbostock.github.com/d3/)
-
-Some experimentation with **D3.js** force graphs using my iTunes library data.
+Experimentation with [D3.js](http://mbostock.github.com/d3/) force 
+graphs using iTunes library data.
 
 ### iTunesGraphParser.py
 
