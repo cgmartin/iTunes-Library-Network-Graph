@@ -4,7 +4,7 @@
 iTunes Graph Parser
 
 Parses an iTunes library XML file and generates a JSON file
-for use in the InfoVis JavaScript library.
+for use in the D3.js JavaScript library.
 
     Example Track info:
     {
