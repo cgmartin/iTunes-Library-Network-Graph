@@ -7,9 +7,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title></title>
-	<meta name="description" content="">
-	<meta name="author" content="">
+	<title>iTunes Music Library Network Graph</title>
+	<meta name="description" content="Experimentation with D3.js force-directed graphs using iTunes library data">
+	<meta name="author" content="Christopher Martin">
 
 	<meta name="viewport" content="width=device-width">
 
@@ -26,15 +26,26 @@
     <div id="page">
         <header>
             <h1>iTunes Music Library Network Graph</h1>
-            <h2>Favorite artists &amp; genres (4/5 stars)</h2>
         </header>
         <div role="main">
+            <p>Experimentation with D3.js force-directed graphs using iTunes library data.</p>
+
+            <h2>Favorite artists &amp; genres (4/5 stars)</h2>
+
+            <p>Here I've filtered my library down to only the 4 and 5 star songs, grouped by artist and genre. 
+            Artist's songs may span genres (and sub-genres) which makes for a somewhat interesting network graph.</p>
+
+
             <div class="buttons">
                 <button class="first active" id="songsBtn"># of Songs</button><button 
                     class="last" id="playsBtn"># of Plays</button>
             </div>
 
             <div id="chart"></div>
+
+            <p>I listen primarily to "Electronic Music" (IDM/Ambient/Downtempo) during the work day while programming,
+            and Rock/80s Pop/Alternative sometimes when the mood strikes me.</p>
+
         </div>
         <footer role="contentinfo">
 	        <nav role="navigation">

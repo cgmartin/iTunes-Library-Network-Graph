@@ -1,7 +1,7 @@
 # iTunes Music Library Network Graph
 
 
-Experimentation with [D3.js](http://mbostock.github.com/d3/) force 
+Experimentation with [D3.js](http://mbostock.github.com/d3/) force-directed 
 graphs using iTunes library data.
 
 **See a [running demo](http://cgmartin.com/itunes-library-network-graph).**
