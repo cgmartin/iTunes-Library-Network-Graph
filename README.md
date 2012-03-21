@@ -4,7 +4,7 @@
 Experimentation with [D3.js](http://mbostock.github.com/d3/) force 
 graphs using iTunes library data.
 
-See a [running demo](http://cgmartin.com/itunes-library-network-graph).
+**See a [running demo](http://cgmartin.com/itunes-library-network-graph).**
 
 ### iTunesGraphParser.py
 
