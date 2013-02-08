@@ -41,6 +41,7 @@ from optparse import OptionParser
 from operator import itemgetter
 
 import os
+import io
 import plistlib
 import json
 
@@ -56,8 +57,9 @@ class SetEncoder(json.JSONEncoder):
 
 class ITunesGraphParser:
 
-    def __init__(self, libraryFile):
+    def __init__(self, libraryFile, outputFile):
         self.libraryFile = libraryFile
+        self.outputFile = outputFile
 
 
     def toJson(self, rating=4, indent=None):
@@ -79,7 +81,8 @@ class ITunesGraphParser:
                 'maxGenreSongs': self._maxGenreSongs,
                 'maxGenrePlays': self._maxGenrePlays
                 }
-
+        with io.open(self.outputFile, 'wb') as outfile:
+            json.dump(jsonObj, outfile, indent=indent, cls=SetEncoder)
         return json.dumps(jsonObj, indent=indent, cls=SetEncoder)
 
     def toJsonP(self, rating=4, indent=None):
@@ -190,11 +193,15 @@ class ITunesGraphParser:
 #### main block ####
 
 defaultLibraryFile = os.path.expanduser('~/Music/iTunes/iTunes Music Library.xml')
+defaultOutputFile = os.path.dirname(os.path.realpath(__file__)) + '/js/music-data.json'
 
 parser = OptionParser(version="%prog 1.0")
 parser.add_option('-f', '--file', dest='file', type='string',
         help='iTunes Library XML file path',
         default=defaultLibraryFile)
+parser.add_option('-o', '--output', dest='output', type='string',
+        help='Output File',
+        default=defaultOutputFile)
 parser.add_option('-r', '--rating', dest='rating', type='int',
         help='Minimum rating filter (default = 4)',
         default=4)
@@ -210,7 +217,7 @@ parser.add_option('-v', '--verbose', dest='verbose', action='store_true',
 if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
-    itunesParser = ITunesGraphParser(options.file)
+    itunesParser = ITunesGraphParser(options.file, options.output)
     if options.jsonp:
         print itunesParser.toJsonP(options.rating, options.indent)
     else:

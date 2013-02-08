@@ -17,6 +17,8 @@ and outputs JSON data.
         --version             show program's version number and exit
         -h, --help            show this help message and exit
         -f FILE, --file=FILE  iTunes Library XML file path
+		-o OUTPUT, --output=OUTPUT
+							  Output file path (default = /js/music-data.json)
         -r RATING, --rating=RATING
                               Minimum rating filter (default = 4)
         -j, --json            Output in JSON format (default)
