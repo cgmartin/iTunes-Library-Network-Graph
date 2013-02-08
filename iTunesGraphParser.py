@@ -57,9 +57,8 @@ class SetEncoder(json.JSONEncoder):
 
 class ITunesGraphParser:
 
-    def __init__(self, libraryFile, outputFile):
+    def __init__(self, libraryFile):
         self.libraryFile = libraryFile
-        self.outputFile = outputFile
 
 
     def toJson(self, rating=4, indent=None):
@@ -81,8 +80,7 @@ class ITunesGraphParser:
                 'maxGenreSongs': self._maxGenreSongs,
                 'maxGenrePlays': self._maxGenrePlays
                 }
-        with io.open(self.outputFile, 'wb') as outfile:
-            json.dump(jsonObj, outfile, indent=indent, cls=SetEncoder)
+        
         return json.dumps(jsonObj, indent=indent, cls=SetEncoder)
 
     def toJsonP(self, rating=4, indent=None):
@@ -217,9 +215,14 @@ parser.add_option('-v', '--verbose', dest='verbose', action='store_true',
 if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
-    itunesParser = ITunesGraphParser(options.file, options.output)
+    itunesParser = ITunesGraphParser(options.file)
     if options.jsonp:
-        print itunesParser.toJsonP(options.rating, options.indent)
+        output = itunesParser.toJsonP(options.rating, options.indent)
+        with io.open(options.output, 'wb') as outfile:
+            json.dump(output, outfile)        
+        print output        
     else:
-        print itunesParser.toJson(options.rating, options.indent)
-
+        output = itunesParser.toJson(options.rating, options.indent)
+        with io.open(options.output, 'wb') as outfile:
+            json.dump(output, outfile)        
+        print output
