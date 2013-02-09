@@ -84,9 +84,8 @@ class ITunesGraphParser:
         return json.dumps(jsonObj, indent=indent, cls=SetEncoder)
 
     def toJsonP(self, rating=4, indent=None):
-        self._rating = rating * 20
-        json = self.toJson(indent)
-        jsonp = 'itgCallback(' + json + ');'
+        json = self.toJson(rating, indent)
+        jsonp = ';itgCallback(' + json + ');'
         return jsonp
 
 
@@ -198,13 +197,13 @@ parser.add_option('-f', '--file', dest='file', type='string',
         help='iTunes Library XML file path',
         default=defaultLibraryFile)
 parser.add_option('-o', '--output', dest='output', type='string',
-        help='Output File',
+        help='Output to file (default=./js/music-data.json)',
         default=defaultOutputFile)
+parser.add_option('-c', '--console', dest='console', action='store_true',
+        help='Output to console instead of file')
 parser.add_option('-r', '--rating', dest='rating', type='int',
         help='Minimum rating filter (default = 4)',
         default=4)
-parser.add_option('-j', '--json', dest='json', action='store_true',
-        help='Output in JSON format (default)')
 parser.add_option('-p', '--jsonp', dest='jsonp', action='store_true',
         help='Output in JSON-P format')
 parser.add_option('-i', '--indent', dest='indent', type='int',
@@ -218,11 +217,12 @@ if __name__ == '__main__':
     itunesParser = ITunesGraphParser(options.file)
     if options.jsonp:
         output = itunesParser.toJsonP(options.rating, options.indent)
-        with io.open(options.output, 'wb') as outfile:
-            json.dump(output, outfile)        
-        print output        
     else:
         output = itunesParser.toJson(options.rating, options.indent)
-        with io.open(options.output, 'wb') as outfile:
-            json.dump(output, outfile)        
+
+    if options.console:
         print output
+    else:
+        with io.open(options.output, 'wb') as outfile:
+            outfile.write(output)
+        print "JSON data written to: " + options.output
