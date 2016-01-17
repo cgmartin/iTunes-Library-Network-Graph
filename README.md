@@ -1,5 +1,6 @@
 # iTunes Music Library Network Graph
 
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 
 Experimentation with [D3.js](http://mbostock.github.com/d3/) force-directed 
 graphs using iTunes library data.
